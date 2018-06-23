@@ -1,0 +1,26 @@
+{
+  "name": "socket.io-chat",
+  "version": "0.0.0",
+  "description": "A simple chat client using socket.io",
+  "main": "index.js",
+  "author": "Grant Timmerman",
+  "private": true,
+  "license": "BSD",
+  "dependencies": {
+    "babel-core": "^6.13.2",
+    "babel-loader": "^6.2.4",
+    "babel-preset-env": "^1.6.1",
+    "babel-preset-react": "^6.11.1",
+    "react": "^15.3.0",
+    "react-dom": "^15.3.0",
+    "webpack": "^2.3.3",
+    "express": "4.13.4"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "webpack": "webpack --mode=development --watch"
+  },
+  "devDependencies": {
+    "webpack-cli": "^3.0.8"
+  }
+}
