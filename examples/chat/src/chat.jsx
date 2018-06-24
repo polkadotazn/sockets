@@ -1,4 +1,6 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
+import ChatterBox from './chatterbox';
 
 var socket = io();
 
@@ -18,8 +20,9 @@ class Chat extends React.Component {
   }
 
   addNewMessage(data) {
-    this.state.messages.push(data);
     let messages = this.state.messages;
+    messages.push(data);
+
     this.setState({
       message: "",
       messages: messages
@@ -34,21 +37,27 @@ class Chat extends React.Component {
 
   handleKeyPress(e) {
     if (e.key === 'Enter') {
-      this.addNewMessage(this.state.message);
+      this.sendMessage();
     }
   }
 
   sendMessage() {
-
     socket.emit('new message', this.state.message);
+    this.addNewMessage(this.state.message);
   }
+
 
   render () {
     return(
       <div>
-        {this.state.messages.map(msg => (
-          msg
-        ))}
+        <div>
+          {this.state.messages.map((msg, idx) => (
+            <ChatterBox
+              key={idx}
+              message={msg}
+            />
+          ))}
+        </div>
         <input type="text"
           onKeyPress={this.handleKeyPress.bind(this)}
           value={this.state.message}
