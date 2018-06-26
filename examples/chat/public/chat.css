@@ -1,0 +1,33 @@
+.outer-chat-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-around;
+  margin: 0 auto;
+  max-width: 700px;
+  margin-top: 100px;
+}
+
+.chat-box {
+  margin: 5px;
+  max-width: 300px;
+  word-break: break-word;
+}
+
+.customer-name {
+  color: blue;
+}
+
+.agent-name {
+  font-weight: bold;
+  color: black;
+}
+
+li {
+  list-style: none;
+}
+
+.chat-input {
+  margin: 0 auto;
+  align-self: center;
+}

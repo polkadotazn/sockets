@@ -2,8 +2,7 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import ChatterBox from './chatterbox';
 
-var socket = io();
-var socket2 = io();
+var socket = io('/room1');
 
 class Chat extends React.Component {
   constructor (props) {
@@ -57,10 +56,9 @@ class Chat extends React.Component {
 
 
   render () {
-    console.log("fangs",this.state);
     return(
       <div>
-        <div>
+        <div className="chat-box">
           {this.state.messages.map((msg, idx) => (
             <ChatterBox
               key={idx}
@@ -69,12 +67,18 @@ class Chat extends React.Component {
             />
           ))}
         </div>
-        <input type="text"
-          value={this.state.message}
-          onKeyPress={this.handleKeyPress.bind(this)}
-          onChange={this.handleInput.bind(this)} >
-        </input>
-        <button onClick={this.sendMessage.bind(this)}>Send</button>
+        <div className="chat-input">
+          <input
+            className="input-box"
+            type="text"
+            value={this.state.message}
+            onKeyPress={this.handleKeyPress.bind(this)}
+            onChange={this.handleInput.bind(this)} >
+          </input>
+          <button className="sendMsg" onClick={this.sendMessage.bind(this)}>
+            Send
+          </button>
+        </div>
       </div>
     );
   }
