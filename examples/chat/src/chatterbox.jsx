@@ -1,10 +1,10 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const ChatterBox = ({ message }) => {
+const ChatterBox = (props) => {
   return (
     <li>
-      {message}
+      {props.username}: {props.message}
     </li>
   );
 };

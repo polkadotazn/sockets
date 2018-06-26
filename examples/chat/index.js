@@ -18,12 +18,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 var numUsers = 0;
 
 io.on('connection', (socket) => {
+
+  socket.on('room', (room) => {
+    socket.join(room);
+  });
+  
   var addedUser = false;
 
   // when the client emits 'new message', this listens and executes
   socket.on('new message', (data) => {
     // we tell the client to execute 'new message'
-    console.log(data);
     socket.broadcast.emit('new message', {
       username: socket.username,
       message: data

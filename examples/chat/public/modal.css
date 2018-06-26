@@ -1,0 +1,74 @@
+.sendIcon {
+  height: 12px;
+  width: 12px;
+  margin-left: 2px;
+  filter: invert(100%);
+}
+
+.sendIcon:hover {
+  height: 13px;
+  width: 13px;
+  margin-left: 1px;
+  opacity: 50%;
+}
+
+.open {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  bottom: 0;
+  padding: 1px;
+  background-color: rgba(0, 0, 0, 0.9);
+  z-index: 10;
+  opacity: 1;
+}
+
+.hidden {
+  display: none;
+}
+
+.modal-box {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  font-size: 16px;
+}
+
+.greeting{
+  font: white;
+  font-size: 20px;
+  margin: 0 0 5px 0;
+}
+
+.nameBox {
+  background-color: inherit;
+  text-align: center;
+  border: 0;
+  border-bottom: 1px solid white;
+  font-size: 16px;
+  color: white;
+  margin: 1px 0 5px 0;
+}
+
+.agentSignIn {
+  font-size: 15px;
+  margin: 5px 0 5px 0;
+}
+
+.agentSignIn button {
+  background-color: inherit;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.agentSignIn button:hover {
+  font-style: italic;
+}
