@@ -48,7 +48,6 @@ class Modal extends React.Component {
   }
 
   render() {
-    console.log(this.state);
     return (
       <div className={this.state.modalStatus}>
         <div className="modal-box">
