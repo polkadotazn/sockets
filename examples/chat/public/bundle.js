@@ -5080,11 +5080,13 @@ var Chat = function (_React$Component) {
       message: "",
       messages: [],
       numUsers: 0,
-      room: 1
+      room: 1,
+      important: []
     };
     if (_this.state.username === "Agent") {
       _this.state.room = props.room;
     }
+    _this.addUser = _this.addUser.bind(_this);
     return _this;
   }
 
@@ -5096,9 +5098,6 @@ var Chat = function (_React$Component) {
       socket.on('new message', function (msg) {
         _this2.addNewMessage(msg.message);
       });
-      if (this.state.username !== "Agent") {
-        socket.emit('add user', function () {});
-      }
 
       socket.on('login', function (_ref) {
         var numUsers = _ref.numUsers;
@@ -5108,32 +5107,51 @@ var Chat = function (_React$Component) {
           _this2.setState({ room: 2 });
         } else if (_this2.state.numUsers > 2) {
           window.alert("No available agent");
+          _this2.setState({ room: 3 });
+        }
+      });
+    }
+  }, {
+    key: 'alertAgent',
+    value: function alertAgent() {
+      var _this3 = this;
+
+      socket.on('user joined', function (info) {
+        if (info.room === _this3.state.room) {
+          window.alert(info.username + ' has joined Room ' + info.room);
+          _this3.startTimer();
         }
       });
     }
   }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this3 = this;
+      var _this4 = this;
 
       window.addEventListener('beforeunload', function () {
-        var msgObj = {
-          message: "Customer has left the room :(",
-          username: null,
-          room: _this3.state.room
-        };
-        socket.emit('new message', msgObj);
+        if (_this4.state.username !== "Agent") {
+          var msgObj = {
+            message: _this4.state.username + ' has left the room!',
+            username: null,
+            room: _this4.state.room
+          };
+          socket.emit('new message', msgObj);
+        }
       });
     }
     //
-    // componentWillUnmount() {
-    //   console.log("delete");
-    //
-    //   socket.emit('new message', msgObj);
-    //   this.addNewMessage(msgObj);
-    //   socket.emit('disconnect');
+    // componentDidUpdate() {
+    //   this.addUser();
     // }
 
+  }, {
+    key: 'addUser',
+    value: function addUser() {
+      if (this.state.username !== "Agent") {
+        socket.emit('add user', this.state.username, this.state.room);
+      }
+      console.log("yikes", this.state.room);
+    }
   }, {
     key: 'addNewMessage',
     value: function addNewMessage(msgObj) {
@@ -5173,6 +5191,9 @@ var Chat = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _this5 = this;
+
+      this.addUser();
       return _react2.default.createElement(
         'div',
         null,
@@ -5183,7 +5204,8 @@ var Chat = function (_React$Component) {
             return _react2.default.createElement(_chatterbox2.default, {
               key: idx,
               message: msg.message,
-              username: msg.username
+              username: msg.username,
+              room: _this5.state.room
             });
           })
         ),
@@ -7410,7 +7432,7 @@ var ChatterBox = function ChatterBox(props) {
     }
     text = _react2.default.createElement(
       'li',
-      null,
+      { id: props.room },
       _react2.default.createElement(
         'text',
         { className: user },
@@ -12125,6 +12147,8 @@ function _possibleConstructorReturn(self, call) { if (!self) { throw new Referen
 
 function _inherits(subClass, superClass) { if (typeof superClass !== "function" && superClass !== null) { throw new TypeError("Super expression must either be null or a function, not " + typeof superClass); } subClass.prototype = Object.create(superClass && superClass.prototype, { constructor: { value: subClass, enumerable: false, writable: true, configurable: true } }); if (superClass) Object.setPrototypeOf ? Object.setPrototypeOf(subClass, superClass) : subClass.__proto__ = superClass; }
 
+var socket = io();
+
 var AgentChat = function (_Chat) {
   _inherits(AgentChat, _Chat);
 
@@ -12139,7 +12163,8 @@ var AgentChat = function (_Chat) {
       messages: [],
       numUsers: 0,
       room: props.room,
-      blinkStatus: "off"
+      blinkStatus: "off",
+      important: []
     };
     return _this;
   }
@@ -12148,7 +12173,24 @@ var AgentChat = function (_Chat) {
     key: 'componentWillMount',
     value: function componentWillMount() {
       _get(AgentChat.prototype.__proto__ || Object.getPrototypeOf(AgentChat.prototype), 'componentWillMount', this).call(this);
-      this.startTimer();
+    }
+  }, {
+    key: 'componentDidMount',
+    value: function componentDidMount() {
+      var _this2 = this;
+
+      _get(AgentChat.prototype.__proto__ || Object.getPrototypeOf(AgentChat.prototype), 'componentDidMount', this).call(this);
+
+      window.addEventListener('mouseup', function () {
+        var selection;
+        if (window.getSelection) {
+          selection = window.getSelection();
+          console.log("id", selection.focusNode.parentNode.id);
+          if (selection !== "") {
+            _this2.state.important.push(selection.toString());
+          }
+        }
+      });
     }
   }, {
     key: 'blinky',
@@ -12167,18 +12209,32 @@ var AgentChat = function (_Chat) {
   }, {
     key: 'startTimer',
     value: function startTimer() {
-      var _this2 = this;
+      var _this3 = this;
 
       window.setTimeout(function () {
-        _this2.blinky();
+        _this3.blinky();
       }, 15000);
     }
   }, {
     key: 'render',
     value: function render() {
+      var _this4 = this;
+
+      console.log(this.state.important);
       return _react2.default.createElement(
         'div',
         null,
+        _react2.default.createElement(
+          'div',
+          { className: 'important-blurbs' },
+          this.state.important.map(function (blurb, idx) {
+            return _react2.default.createElement(
+              'li',
+              null,
+              blurb
+            );
+          })
+        ),
         _react2.default.createElement(
           'div',
           { className: 'chat-box' },
@@ -12186,7 +12242,8 @@ var AgentChat = function (_Chat) {
             return _react2.default.createElement(_chatterbox2.default, {
               key: idx,
               message: msg.message,
-              username: msg.username
+              username: msg.username,
+              room: _this4.state.room
             });
           })
         ),
@@ -12205,7 +12262,7 @@ var AgentChat = function (_Chat) {
           }),
           _react2.default.createElement(
             'button',
-            { className: 'sendMsg', onClick: this.sendMessage.bind(this) },
+            { className: 'send-msg', onClick: this.sendMessage.bind(this) },
             'Send'
           )
         )
@@ -12246,14 +12303,37 @@ var AgentView = function AgentView(props) {
     { className: 'outer-chat-box' },
     _react2.default.createElement(
       'div',
-      null,
+      { className: 'chat-holder' },
       _react2.default.createElement(_agent_chat2.default, { username: props.username, room: 1 }),
       _react2.default.createElement(_agent_chat2.default, { username: props.username, room: 2 })
     ),
     _react2.default.createElement(
       'div',
       { className: 'instructions' },
-      '1. To switch from chat 1 to chat 2, press tab twice. 2. To switch from chat 2 to chat 1, press shift+tab twice. 3. The input box will start blinking if the customer has been left unattended for longer than 10 seconds.'
+      _react2.default.createElement(
+        'ol',
+        null,
+        _react2.default.createElement(
+          'li',
+          null,
+          'Press \'Enter\' or click "send" to send message.'
+        ),
+        _react2.default.createElement(
+          'li',
+          null,
+          'To switch from chat 1 to chat 2, press tab twice.'
+        ),
+        _react2.default.createElement(
+          'li',
+          null,
+          'To switch from chat 2 to chat 1, press shift+tab twice.'
+        ),
+        _react2.default.createElement(
+          'li',
+          null,
+          'The input box will start blinking if the customer has been left unattended for longer than 15 seconds.'
+        )
+      )
     )
   );
 };

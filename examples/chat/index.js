@@ -161,7 +161,7 @@ io.on('connection', (socket) => {
   });
 
   // when the client emits 'add user', this listens and executes
-  socket.on('add user', (username) => {
+  socket.on('add user', (username, room) => {
     if (addedUser) return;
 
     // we store the username in the socket session for this client
@@ -175,7 +175,8 @@ io.on('connection', (socket) => {
     // echo globally (all clients) that a person has connected
     socket.broadcast.emit('user joined', {
       username: socket.username,
-      numUsers: numUsers
+      numUsers: numUsers,
+      room: room
     });
   });
 

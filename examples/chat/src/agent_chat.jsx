@@ -2,6 +2,8 @@ import React from 'react';
 import Chat from './chat';
 import ChatterBox from './chatterbox';
 
+var socket = io();
+
 class AgentChat extends Chat {
   constructor(props) {
     super(props);
@@ -11,13 +13,28 @@ class AgentChat extends Chat {
       messages: [],
       numUsers: 0,
       room: props.room,
-      blinkStatus: "off"
+      blinkStatus: "off",
+      important: []
     };
   }
 
   componentWillMount() {
     super.componentWillMount();
-    this.startTimer();
+  }
+
+  componentDidMount() {
+    super.componentDidMount();
+
+    window.addEventListener('mouseup', () => {
+      var selection;
+      if (window.getSelection) {
+        selection = window.getSelection();
+        console.log("id", selection.focusNode.parentNode.id);
+        if (selection !== "") {
+          this.state.important.push(selection.toString());
+        }
+      }
+    });
   }
 
   blinky() {
@@ -39,14 +56,21 @@ class AgentChat extends Chat {
   }
 
   render() {
+    console.log(this.state.important);
     return(
       <div>
+        <div className="important-blurbs">
+          {this.state.important.map((blurb, idx) => (
+            <li>{blurb}</li>
+          ))}
+        </div>
         <div className="chat-box">
           {this.state.messages.map((msg, idx) => (
             <ChatterBox
               key={idx}
               message={msg.message}
               username={msg.username}
+              room={this.state.room}
             />
           ))}
         </div>
@@ -62,7 +86,7 @@ class AgentChat extends Chat {
             onBlur={this.startTimer.bind(this)}
           >
           </input>
-          <button className="sendMsg" onClick={this.sendMessage.bind(this)}>
+          <button className="send-msg" onClick={this.sendMessage.bind(this)}>
             Send
           </button>
         </div>

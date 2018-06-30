@@ -5,7 +5,7 @@
   justify-content: space-around;
   margin: 0 auto;
   max-width: 700px;
-  margin-top: 100px;
+  margin-top: 60px;
 }
 
 .chat-holder {
@@ -13,12 +13,30 @@
   flex-direction: row;
   align-items: center;
   justify-content: space-around;
+  width: 700px;
 }
 
 .chat-box {
-  margin: 5px;
-  max-width: 300px;
+  height: 400px;
+  width: 300px;
   word-break: break-word;
+  border: 1px solid gray;
+  padding: 2px;
+  margin-bottom: 4px;
+}
+
+.chat-input {
+  width: 300px;
+  align-self: center;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  height: 21px;
+}
+
+.input-box {
+  width: 250px;
 }
 
 .customer-name {
@@ -36,7 +54,6 @@ li {
 
 .chat-input {
   margin: 0 auto;
-  align-self: center;
 }
 
 @-webkit-keyframes blink {
@@ -48,4 +65,18 @@ li {
 #on {
   border: 1px solid black;
   -webkit-animation: blink .5s step-end infinite alternate;
+}
+
+.send-msg {
+  margin-left: 5px;
+  border-radius: 2px;
+}
+
+.send-msg:hover {
+  background-color: thistle;
+  border-radius: 2px;
+}
+
+.instructions li {
+  list-style: decimal;
 }

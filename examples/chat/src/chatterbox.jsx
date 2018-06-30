@@ -12,7 +12,7 @@ const ChatterBox = (props) => {
       user = "customer-name";
     }
     text = (
-      <li>
+      <li id={props.room}>
         <text className={user}>{`${props.username}: `}</text>{props.message}
       </li>
     );
