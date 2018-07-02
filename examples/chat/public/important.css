@@ -1,0 +1,16 @@
+.important-blurbs {
+  height: 100px;
+  width: 300px;
+  border: 1px solid lightgray;
+  padding: 2px;
+  margin-bottom: 10px;
+  border-radius: 11px;
+}
+
+.blurb {
+  background-color: paleturquoise;
+  border-radius: 8px;
+  margin-right: 1px;
+  font-size: 12px;
+  padding: 3px 6px 3px 6px;
+}

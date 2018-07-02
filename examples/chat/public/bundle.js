@@ -5057,6 +5057,10 @@ var _chatterbox = __webpack_require__(63);
 
 var _chatterbox2 = _interopRequireDefault(_chatterbox);
 
+var _reactDom = __webpack_require__(104);
+
+var _reactDom2 = _interopRequireDefault(_reactDom);
+
 function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
@@ -5080,8 +5084,7 @@ var Chat = function (_React$Component) {
       message: "",
       messages: [],
       numUsers: 0,
-      room: 1,
-      important: []
+      room: null
     };
     if (_this.state.username === "Agent") {
       _this.state.room = props.room;
@@ -5099,12 +5102,17 @@ var Chat = function (_React$Component) {
         _this2.addNewMessage(msg.message);
       });
 
+      this.addUser();
+
       socket.on('login', function (_ref) {
-        var numUsers = _ref.numUsers;
+        var numUsers = _ref.numUsers,
+            room = _ref.room;
 
         _this2.setState({ numUsers: numUsers });
-        if (_this2.state.numUsers === 2 && _this2.state.username !== "Agent") {
-          _this2.setState({ room: 2 });
+        if (_this2.state.numUsers <= 2 && _this2.state.username !== "Agent") {
+          _this2.setState({
+            room: room
+          });
         } else if (_this2.state.numUsers > 2) {
           window.alert("No available agent");
           _this2.setState({ room: 3 });
@@ -5112,43 +5120,31 @@ var Chat = function (_React$Component) {
       });
     }
   }, {
-    key: 'alertAgent',
-    value: function alertAgent() {
-      var _this3 = this;
-
-      socket.on('user joined', function (info) {
-        if (info.room === _this3.state.room) {
-          window.alert(info.username + ' has joined Room ' + info.room);
-          _this3.startTimer();
-        }
-      });
-    }
-  }, {
     key: 'componentDidMount',
     value: function componentDidMount() {
-      var _this4 = this;
+      var _this3 = this;
 
       window.addEventListener('beforeunload', function () {
-        if (_this4.state.username !== "Agent") {
+        if (_this3.state.username !== "Agent") {
           var msgObj = {
-            message: _this4.state.username + ' has left the room!',
+            message: _this3.state.username + ' has left the room!',
             username: null,
-            room: _this4.state.room
+            room: _this3.state.room
           };
           socket.emit('new message', msgObj);
         }
       });
     }
-    //
-    // componentDidUpdate() {
-    //   this.addUser();
-    // }
-
+  }, {
+    key: 'componentDidUpdate',
+    value: function componentDidUpdate() {
+      _reactDom2.default.findDOMNode(this).scrollTop = 100;
+    }
   }, {
     key: 'addUser',
     value: function addUser() {
       if (this.state.username !== "Agent") {
-        socket.emit('add user', this.state.username, this.state.room);
+        socket.emit('add user', this.state.username);
       }
       console.log("yikes", this.state.room);
     }
@@ -5191,37 +5187,45 @@ var Chat = function (_React$Component) {
   }, {
     key: 'render',
     value: function render() {
-      var _this5 = this;
+      var _this4 = this;
 
-      this.addUser();
       return _react2.default.createElement(
         'div',
         null,
         _react2.default.createElement(
           'div',
           { className: 'chat-box' },
-          this.state.messages.map(function (msg, idx) {
-            return _react2.default.createElement(_chatterbox2.default, {
-              key: idx,
-              message: msg.message,
-              username: msg.username,
-              room: _this5.state.room
-            });
-          })
-        ),
-        _react2.default.createElement(
-          'div',
-          { className: 'chat-input' },
-          _react2.default.createElement('input', {
-            className: 'input-box',
-            type: 'text',
-            value: this.state.message,
-            onKeyPress: this.handleKeyPress.bind(this),
-            onChange: this.handleInput.bind(this) }),
           _react2.default.createElement(
-            'button',
-            { className: 'sendMsg', onClick: this.sendMessage.bind(this) },
-            'Send'
+            'div',
+            { className: 'chat-title' },
+            this.state.username
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'message', ref: 'msg' },
+            this.state.messages.map(function (msg, idx) {
+              return _react2.default.createElement(_chatterbox2.default, {
+                key: idx,
+                message: msg.message,
+                username: msg.username,
+                room: _this4.state.room
+              });
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'chat-input' },
+            _react2.default.createElement('input', {
+              className: 'input-box',
+              type: 'text',
+              value: this.state.message,
+              onKeyPress: this.handleKeyPress.bind(this),
+              onChange: this.handleInput.bind(this) }),
+            _react2.default.createElement(
+              'button',
+              { className: 'send-msg', onClick: this.sendMessage.bind(this) },
+              'Send'
+            )
           )
         )
       );
@@ -7418,27 +7422,26 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 
 var ChatterBox = function ChatterBox(props) {
   console.log("chatter", props);
-  var user = "agent-name";
+  var user = "agent";
   var text = void 0;
   if (!props.username) {
     text = _react2.default.createElement(
-      'li',
-      null,
+      'div',
+      { className: 'adios' },
       props.message
     );
   } else {
     if (props.username !== "Agent") {
-      user = "customer-name";
+      user = "customer";
     }
     text = _react2.default.createElement(
-      'li',
+      'div',
       { id: props.room },
       _react2.default.createElement(
-        'text',
-        { className: user },
-        props.username + ': '
-      ),
-      props.message
+        'div',
+        { className: 'chat-bubble', id: user },
+        props.message
+      )
     );
   }
 
@@ -12164,7 +12167,8 @@ var AgentChat = function (_Chat) {
       numUsers: 0,
       room: props.room,
       blinkStatus: "off",
-      important: []
+      important: [],
+      clientName: null
     };
     return _this;
   }
@@ -12182,15 +12186,39 @@ var AgentChat = function (_Chat) {
       _get(AgentChat.prototype.__proto__ || Object.getPrototypeOf(AgentChat.prototype), 'componentDidMount', this).call(this);
 
       window.addEventListener('mouseup', function () {
-        var selection;
+        var blurbs = _this2.state.important;
         if (window.getSelection) {
-          selection = window.getSelection();
-          console.log("id", selection.focusNode.parentNode.id);
-          if (selection !== "") {
-            _this2.state.important.push(selection.toString());
+          var selection = window.getSelection();
+          var selectionText = selection.toString();
+          var id = parseInt(selection.focusNode.parentNode.parentNode.id);
+          if (selectionText !== "" && _this2.state.room === id && !blurbs.includes(selectionText)) {
+            blurbs.push(selectionText);
+            _this2.setState({ important: blurbs });
           }
         }
       });
+
+      socket.on('user joined', function (info) {
+        if (info.room === _this2.state.room) {
+          window.alert(info.username + ' has joined Room ' + info.room);
+          _this2.startTimer();
+          _this2.setState({ clientName: info.username });
+        }
+      });
+
+      socket.on('user left', function (info) {
+        if (info.room === _this2.state.room) {
+          _this2.setState({ blinkStatus: "off" });
+        }
+      });
+    }
+  }, {
+    key: 'deleteBlurb',
+    value: function deleteBlurb(e) {
+      var blurbs = this.state.important;
+      var index = blurbs.indexOf(e.target.innerHTML);
+      blurbs.splice(index, 1);
+      this.setState({ important: blurbs });
     }
   }, {
     key: 'blinky',
@@ -12229,8 +12257,12 @@ var AgentChat = function (_Chat) {
           { className: 'important-blurbs' },
           this.state.important.map(function (blurb, idx) {
             return _react2.default.createElement(
-              'li',
-              null,
+              'text',
+              {
+                className: 'blurb',
+                key: idx,
+                onClick: _this4.deleteBlurb.bind(_this4)
+              },
               blurb
             );
           })
@@ -12238,32 +12270,41 @@ var AgentChat = function (_Chat) {
         _react2.default.createElement(
           'div',
           { className: 'chat-box' },
-          this.state.messages.map(function (msg, idx) {
-            return _react2.default.createElement(_chatterbox2.default, {
-              key: idx,
-              message: msg.message,
-              username: msg.username,
-              room: _this4.state.room
-            });
-          })
-        ),
-        _react2.default.createElement(
-          'div',
-          { className: 'chat-input' },
-          _react2.default.createElement('input', {
-            className: 'input-box',
-            type: 'text',
-            value: this.state.message,
-            onKeyPress: this.handleKeyPress.bind(this),
-            onChange: this.handleInput.bind(this),
-            id: this.state.blinkStatus,
-            onFocus: this.stopBlinky.bind(this),
-            onBlur: this.startTimer.bind(this)
-          }),
           _react2.default.createElement(
-            'button',
-            { className: 'send-msg', onClick: this.sendMessage.bind(this) },
-            'Send'
+            'div',
+            { className: 'chat-title' },
+            this.state.clientName
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'message' },
+            this.state.messages.map(function (msg, idx) {
+              return _react2.default.createElement(_chatterbox2.default, {
+                key: idx,
+                message: msg.message,
+                username: msg.username,
+                room: _this4.state.room
+              });
+            })
+          ),
+          _react2.default.createElement(
+            'div',
+            { className: 'chat-input' },
+            _react2.default.createElement('input', {
+              className: 'input-box',
+              type: 'text',
+              value: this.state.message,
+              onKeyPress: this.handleKeyPress.bind(this),
+              onChange: this.handleInput.bind(this),
+              id: this.state.blinkStatus,
+              onFocus: this.stopBlinky.bind(this),
+              onBlur: this.startTimer.bind(this)
+            }),
+            _react2.default.createElement(
+              'button',
+              { className: 'send-msg', onClick: this.sendMessage.bind(this) },
+              'Send'
+            )
           )
         )
       );
@@ -12529,8 +12570,35 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
 var UserView = function UserView(props) {
   return _react2.default.createElement(
     'div',
-    { className: 'outer-chat-box' },
-    _react2.default.createElement(_chat2.default, { username: props.username })
+    null,
+    _react2.default.createElement(
+      'div',
+      { className: 'outer-chat-box' },
+      _react2.default.createElement(_chat2.default, { username: props.username }),
+      _react2.default.createElement(
+        'div',
+        { className: 'instructions' },
+        _react2.default.createElement(
+          'ol',
+          null,
+          _react2.default.createElement(
+            'li',
+            null,
+            'Press \'Enter\' or click "send" to send message.'
+          ),
+          _react2.default.createElement(
+            'li',
+            null,
+            'An agent will be with you shortly.'
+          ),
+          _react2.default.createElement(
+            'li',
+            null,
+            'Close the window to exit from the chat.'
+          )
+        )
+      )
+    )
   );
 };
 

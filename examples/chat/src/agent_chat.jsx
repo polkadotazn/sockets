@@ -14,7 +14,8 @@ class AgentChat extends Chat {
       numUsers: 0,
       room: props.room,
       blinkStatus: "off",
-      important: []
+      important: [],
+      clientName: null
     };
   }
 
@@ -26,15 +27,39 @@ class AgentChat extends Chat {
     super.componentDidMount();
 
     window.addEventListener('mouseup', () => {
-      var selection;
+      let blurbs = this.state.important;
       if (window.getSelection) {
-        selection = window.getSelection();
-        console.log("id", selection.focusNode.parentNode.id);
-        if (selection !== "") {
-          this.state.important.push(selection.toString());
+        let selection = window.getSelection();
+        let selectionText = selection.toString();
+        let id = parseInt(selection.focusNode.parentNode.parentNode.id);
+        if (selectionText !== "" && this.state.room === id
+          && !blurbs.includes(selectionText)) {
+          blurbs.push(selectionText);
+          this.setState({ important: blurbs });
         }
       }
     });
+
+    socket.on('user joined', (info) => {
+      if (info.room === this.state.room) {
+        window.alert(`${info.username} has joined Room ${info.room}`);
+        this.startTimer();
+        this.setState({ clientName: info.username });
+      }
+    });
+
+    socket.on('user left', (info) => {
+      if (info.room === this.state.room) {
+        this.setState({ blinkStatus: "off" });
+      }
+    });
+  }
+
+  deleteBlurb(e) {
+    let blurbs = this.state.important;
+    let index = blurbs.indexOf(e.target.innerHTML);
+    blurbs.splice(index, 1);
+    this.setState({ important: blurbs });
   }
 
   blinky() {
@@ -61,34 +86,45 @@ class AgentChat extends Chat {
       <div>
         <div className="important-blurbs">
           {this.state.important.map((blurb, idx) => (
-            <li>{blurb}</li>
+            <text
+              className="blurb"
+              key={idx}
+              onClick={this.deleteBlurb.bind(this)}
+            >
+              {blurb}
+            </text>
           ))}
         </div>
         <div className="chat-box">
-          {this.state.messages.map((msg, idx) => (
-            <ChatterBox
-              key={idx}
-              message={msg.message}
-              username={msg.username}
-              room={this.state.room}
-            />
-          ))}
-        </div>
-        <div className="chat-input">
-          <input
-            className="input-box"
-            type="text"
-            value={this.state.message}
-            onKeyPress={this.handleKeyPress.bind(this)}
-            onChange={this.handleInput.bind(this)}
-            id={this.state.blinkStatus}
-            onFocus={this.stopBlinky.bind(this)}
-            onBlur={this.startTimer.bind(this)}
-          >
-          </input>
-          <button className="send-msg" onClick={this.sendMessage.bind(this)}>
-            Send
-          </button>
+          <div className="chat-title">
+            {this.state.clientName}
+          </div>
+          <div className="message">
+            {this.state.messages.map((msg, idx) => (
+              <ChatterBox
+                key={idx}
+                message={msg.message}
+                username={msg.username}
+                room={this.state.room}
+              />
+            ))}
+          </div>
+          <div className="chat-input">
+            <input
+              className="input-box"
+              type="text"
+              value={this.state.message}
+              onKeyPress={this.handleKeyPress.bind(this)}
+              onChange={this.handleInput.bind(this)}
+              id={this.state.blinkStatus}
+              onFocus={this.stopBlinky.bind(this)}
+              onBlur={this.startTimer.bind(this)}
+            >
+            </input>
+            <button className="send-msg" onClick={this.sendMessage.bind(this)}>
+              Send
+            </button>
+          </div>
         </div>
       </div>
     );

@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import ChatterBox from './chatterbox';
+import ReactDOM from 'react-dom';
 
 var socket = io();
 
@@ -12,8 +13,7 @@ class Chat extends React.Component {
       message: "",
       messages: [],
       numUsers: 0,
-      room: 1,
-      important: [],
+      room: null,
     };
     if (this.state.username === "Agent") {
       this.state.room = props.room;
@@ -26,10 +26,14 @@ class Chat extends React.Component {
       this.addNewMessage(msg.message);
     });
 
-    socket.on('login', ( {numUsers} ) => {
+    this.addUser();
+
+    socket.on('login', ( {numUsers, room } ) => {
       this.setState({numUsers: numUsers});
-      if (this.state.numUsers === 2 && this.state.username !== "Agent") {
-        this.setState( {room: 2} );
+      if (this.state.numUsers <= 2 && this.state.username !== "Agent") {
+        this.setState({
+          room: room
+        });
       } else if (this.state.numUsers > 2) {
         window.alert("No available agent");
         this.setState( {room: 3} );
@@ -37,17 +41,7 @@ class Chat extends React.Component {
     });
   }
 
-  alertAgent() {
-    socket.on('user joined', (info) => {
-      if (info.room === this.state.room) {
-        window.alert(`${info.username} has joined Room ${info.room}`);
-        this.startTimer();
-      }
-    });
-  }
-
   componentDidMount () {
-
     window.addEventListener('beforeunload', () => {
       if (this.state.username !== "Agent") {
         let msgObj = {
@@ -59,14 +53,14 @@ class Chat extends React.Component {
       }
     });
   }
-  //
-  // componentDidUpdate() {
-  //   this.addUser();
-  // }
+
+  componentDidUpdate() {
+    ReactDOM.findDOMNode(this).scrollTop = 100;
+  }
 
   addUser() {
     if (this.state.username !== "Agent") {
-      socket.emit('add user', this.state.username, this.state.room);
+      socket.emit('add user', this.state.username);
     }
     console.log("yikes", this.state.room);
   }
@@ -106,33 +100,35 @@ class Chat extends React.Component {
     this.addNewMessage(msgObj);
   }
 
-
-
   render () {
-    this.addUser();
     return(
       <div>
         <div className="chat-box">
-          {this.state.messages.map((msg, idx) => (
-            <ChatterBox
-              key={idx}
-              message={msg.message}
-              username={msg.username}
-              room={this.state.room}
-            />
-          ))}
-        </div>
-        <div className="chat-input">
-          <input
-            className="input-box"
-            type="text"
-            value={this.state.message}
-            onKeyPress={this.handleKeyPress.bind(this)}
-            onChange={this.handleInput.bind(this)} >
-          </input>
-          <button className="sendMsg" onClick={this.sendMessage.bind(this)}>
-            Send
-          </button>
+          <div className="chat-title">
+            {this.state.username}
+          </div>
+          <div className="message" ref="msg">
+            {this.state.messages.map((msg, idx) => (
+              <ChatterBox
+                key={idx}
+                message={msg.message}
+                username={msg.username}
+                room={this.state.room}
+              />
+            ))}
+          </div>
+          <div className="chat-input">
+            <input
+              className="input-box"
+              type="text"
+              value={this.state.message}
+              onKeyPress={this.handleKeyPress.bind(this)}
+              onChange={this.handleInput.bind(this)} >
+            </input>
+            <button className="send-msg" onClick={this.sendMessage.bind(this)}>
+              Send
+            </button>
+          </div>
         </div>
       </div>
     );
